@@ -1,7 +1,8 @@
 {
   "name": "aisdk-rag-postgresql-starter",
   "version": "1.0.0",
-  "description": "A starter template for building RAG applications with Vercel AI SDK and PostgreSQL",
+  "description": "AI-powered RAG chatbot with PostgreSQL vector storage",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,6 +10,9 @@
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
     "@ai-sdk/openai": "^2.0.22",
     "@ai-sdk/react": "^2.0.27",
@@ -20,6 +24,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^10.1.0",
+    "recharts": "^3.1.2",
     "zod": "^4.1.4"
   },
   "devDependencies": {

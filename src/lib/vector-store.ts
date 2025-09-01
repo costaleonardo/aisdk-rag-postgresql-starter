@@ -202,7 +202,7 @@ export async function deleteDocument(documentId: number): Promise<boolean> {
     const result = await sql`
       DELETE FROM documents WHERE id = ${documentId}
     `;
-    return result.count > 0;
+    return (result as any).count > 0;
   } catch (error) {
     console.error('Error deleting document:', error);
     return false;

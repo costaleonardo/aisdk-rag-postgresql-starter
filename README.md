@@ -1,26 +1,29 @@
-# AI SDK + RAG + PostgreSQL Starter Template
+# RAG Assistant - AI-Powered Knowledge Base
 
-A production-ready starter template for building Retrieval Augmented Generation (RAG) applications using Vercel AI SDK, PostgreSQL with pgvector, and Next.js.
+A professional RAG (Retrieval Augmented Generation) application with a beautiful chat interface, built with Next.js 14, Vercel AI SDK, and PostgreSQL with pgvector. Features a sliding sidebar navigation, streaming chat responses, and intelligent document search capabilities.
 
 ## Features
 
+- **🎨 Professional UI** - Beautiful chat interface with sliding sidebar navigation
 - **🚀 Quick Setup** - Get your RAG application running in minutes
-- **🔍 Vector Search** - PostgreSQL with pgvector for efficient similarity search
-- **🤖 AI-Powered Chat** - Streaming responses with GPT-4 and tool calling
-- **📊 Web Scraping** - Automatic content extraction from URLs
-- **📝 Text Ingestion** - Direct text input for knowledge base creation
+- **🔍 Vector Search** - PostgreSQL with pgvector for efficient semantic similarity search
+- **🤖 AI-Powered Chat** - Streaming responses with GPT-4o and intelligent tool calling
+- **📊 Web Scraping** - Automatic content extraction and cleaning from URLs
+- **📝 Direct Input** - Add text content directly through chat or dedicated interface
 - **⚡ Real-time Streaming** - Smooth chat experience with streaming responses
-- **🛠️ Tool Calling** - AI agent with multiple tools for searching and analysis
+- **🛠️ Smart Tools** - AI agent with multiple tools for searching and content management
+- **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
 - **📦 TypeScript** - Full type safety across the application
 
 ## Tech Stack
 
 - **Framework**: Next.js 14 (App Router)
-- **AI SDK**: Vercel AI SDK
-- **LLM**: OpenAI GPT-4
-- **Embeddings**: OpenAI text-embedding-ada-002
+- **AI SDK**: Vercel AI SDK v5.0.27
+- **LLM**: OpenAI GPT-4o
+- **Embeddings**: OpenAI text-embedding-ada-002 (1536 dimensions)
 - **Database**: PostgreSQL with pgvector extension
-- **Styling**: Tailwind CSS
+- **Styling**: Tailwind CSS v4 with custom design system
+- **Typography**: Montserrat font family
 - **Language**: TypeScript
 
 ## Quick Start
@@ -75,36 +78,40 @@ Open [http://localhost:3000](http://localhost:3000) to see your application.
 
 ## Usage
 
-### 1. Ingest Content
+### 1. Add Content to Knowledge Base
 
-You can add content to your knowledge base in two ways:
+You can add content to your knowledge base in multiple ways:
 
-**Via URL**:
-- Enter any website URL
-- The system will scrape, chunk, and embed the content
-- Automatic text extraction and cleaning
+**Via Chat Interface**:
+- Ask the assistant to add content directly: "Add this information about..."
+- The AI will use the `addResource` tool to store content with proper chunking
 
-**Via Text**:
-- Paste raw text content
-- Provide a title for the document
-- Direct ingestion without web scraping
+**Via Web Scraper Page** (`/scraper`):
+- **URL Scraping**: Enter any website URL for automatic content extraction and cleaning
+- **Direct Text Input**: Paste raw text content with optional title
+- Professional interface with real-time feedback
+
+**Automatic Processing**:
+- Content is intelligently chunked using sentence boundaries
+- Each chunk is embedded using OpenAI's text-embedding-ada-002
+- Stored in PostgreSQL with vector indexes for fast similarity search
 
 ### 2. Chat with Your Knowledge Base
 
-The AI assistant can:
-- Search through your documents semantically
-- Retrieve specific information
-- Answer questions based on stored content
-- Cite sources from your knowledge base
+The AI assistant provides intelligent search and retrieval:
+- **Semantic Search**: Find relevant information using natural language queries
+- **Source Citation**: Get accurate answers with source references
+- **Multi-step Reasoning**: Complex queries handled with up to 5 reasoning steps
+- **Content Suggestions**: AI suggests adding missing information when needed
 
 ### Available AI Tools
 
-The chat interface includes these built-in tools:
+The chat interface includes these intelligent tools:
 
-- **`searchDocuments`**: Semantic similarity search
-- **`getDocument`**: Retrieve specific documents by ID
-- **`listDocuments`**: Browse all stored documents
-- **`fullTextSearch`**: Keyword-based search
+- **`addResource`**: Add new content directly to knowledge base through chat
+- **`getInformation`**: Semantic vector search with similarity scoring
+- **`getDocument`**: Retrieve specific documents by ID with full content
+- **`listDocuments`**: Browse available documents with previews and metadata
 
 ## Project Structure
 
@@ -113,26 +120,32 @@ aisdk-rag-postgresql-starter/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── chat/          # AI chat endpoint with tool calling
-│   │   │   └── ingest/        # Content ingestion endpoint
-│   │   ├── components/
-│   │   │   ├── chat-interface.tsx   # Chat UI component
-│   │   │   └── ingest-form.tsx      # Ingestion form component
-│   │   ├── page.tsx           # Main application page
-│   │   ├── layout.tsx         # Root layout
-│   │   └── globals.css        # Global styles
+│   │   │   ├── chat/          # AI chat endpoint with GPT-4o and tool calling
+│   │   │   └── ingest/        # Content ingestion endpoint (URL + text)
+│   │   ├── scraper/           # Web scraping and text input interface
+│   │   ├── page.tsx           # Main chat interface
+│   │   ├── layout.tsx         # Root layout with Montserrat font
+│   │   └── globals.css        # Global styles with custom design system
+│   ├── components/
+│   │   ├── main-layout.tsx    # Root layout with sliding sidebar
+│   │   ├── sidebar.tsx        # Professional sidebar navigation
+│   │   ├── chat-interface.tsx # Chat UI with streaming and tool visualization
+│   │   └── ui/                # Reusable UI components
+│   │       ├── button.tsx     # Styled button component
+│   │       ├── card.tsx       # Card component with variants
+│   │       └── input.tsx      # Form input component
 │   └── lib/
-│       ├── chunking.ts        # Text chunking utilities
-│       ├── db.ts              # Database connection
-│       ├── scraper.ts         # Web scraping utilities
-│       └── vector-store.ts    # Vector operations and storage
+│       ├── db.ts              # Neon PostgreSQL connection
+│       ├── vector-store.ts    # Vector operations and embedding generation
+│       ├── chunking.ts        # Intelligent text chunking with sentence boundaries
+│       └── scraper.ts         # Web scraping with Cheerio
 ├── database/
-│   └── schema.sql            # PostgreSQL schema with pgvector
-├── package.json
-├── tsconfig.json
-├── tailwind.config.js
-├── next.config.js
-└── .env.example
+│   └── schema.sql             # PostgreSQL schema with pgvector and HNSW indexes
+├── public/
+│   └── logo.svg               # Application logo
+├── package.json               # Dependencies including AI SDK v5 and Tailwind v4
+├── tailwind.config.js         # Custom design system configuration
+└── CLAUDE.md                  # Development guidance for Claude Code
 ```
 
 ## API Endpoints
@@ -175,11 +188,23 @@ The template uses a simple but powerful schema:
 - **`document_chunks`**: Stores text chunks with vector embeddings
 - **Indexes**: HNSW index for fast similarity search
 
+## UI Design System
+
+### Color Palette
+- **Primary**: #003D5B (Unifying Blue) - Sidebar background and accents
+- **Background**: White content areas with blue sidebar theme
+- **Typography**: Montserrat font with custom scales (heading-1 to heading-5, body, caption)
+
+### Layout System
+- **Sidebar**: Collapsible (64px collapsed, 256px expanded) with smooth animations
+- **Responsive**: Mobile-friendly design with proper touch interactions
+- **Components**: Consistent UI components with variant support
+
 ## Customization
 
 ### Modify the System Prompt
 
-Edit the system prompt in `src/app/api/chat/route.ts`:
+Edit the AI assistant behavior in `src/app/api/chat/route.ts`:
 
 ```typescript
 system: `Your custom system prompt here...`
@@ -187,14 +212,14 @@ system: `Your custom system prompt here...`
 
 ### Add Custom Tools
 
-Add new tools to the chat endpoint:
+Extend the AI capabilities with new tools:
 
 ```typescript
 tools: {
   yourCustomTool: tool({
     description: 'Tool description',
-    parameters: z.object({
-      // Define parameters
+    inputSchema: z.object({
+      // Define parameters with Zod validation
     }),
     execute: async (params) => {
       // Tool implementation
@@ -213,7 +238,7 @@ model: openai.embedding('text-embedding-3-small'), // or another model
 
 ### Adjust Chunking Strategy
 
-Modify chunking parameters in `src/lib/chunking.ts`:
+Modify text processing in `src/lib/chunking.ts`:
 
 ```typescript
 const {
@@ -221,6 +246,17 @@ const {
   overlap = 100,         // Overlap between chunks
   minChunkLength = 100   // Minimum chunk size
 } = options;
+```
+
+### Customize UI Theme
+
+Update the design system in `tailwind.config.js`:
+
+```javascript
+colors: {
+  'unifying-blue': '#003D5B',  // Primary brand color
+  // Add your custom colors
+}
 ```
 
 ## Environment Variables
@@ -327,4 +363,4 @@ For issues and questions:
 
 ---
 
-Built with ❤️ using Vercel AI SDK and PostgreSQL :)
+**RAG Assistant** - Built with ❤️ using Vercel AI SDK, PostgreSQL, and a professional design system for beautiful RAG experiences.

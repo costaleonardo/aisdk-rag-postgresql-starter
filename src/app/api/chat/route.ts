@@ -1,8 +1,9 @@
 import { NextRequest } from 'next/server';
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
+import { streamText, tool, stepCountIs } from 'ai';
 import { z } from 'zod';
-import { vectorSearch, getDocumentById, getAllDocuments, fullTextSearch } from '@/lib/vector-store';
+import { vectorSearch, getDocumentById, getAllDocuments, storeDocument } from '@/lib/vector-store';
+import { chunkContent } from '@/lib/chunking';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,58 +14,124 @@ export async function POST(request: NextRequest) {
       return new Response('Messages array is required', { status: 400 });
     }
 
-    // Stream the response using Vercel AI SDK
+    // Convert messages to the format expected by the AI SDK
+    const modelMessages = messages.map((msg: any) => ({
+      role: msg.role,
+      content: msg.content || ''
+    }));
+
     const result = streamText({
-      model: openai('gpt-4o-mini'), // Using mini for cost efficiency
-      system: `You are a helpful AI assistant with access to a knowledge base stored in a vector database. 
-      
-You can search through documents, retrieve specific information, and provide accurate answers based on the stored content.
+      model: openai('gpt-4o'),
+      system: `You are a helpful AI assistant with access to a knowledge base stored in a vector database. You can search through documents, add new content to the knowledge base, and provide accurate answers based on the stored content.
 
 Available tools:
-- searchDocuments: Semantic search through the knowledge base
+- addResource: Add new content to the knowledge base (useful when users want to store new information)
+- getInformation: Search through the knowledge base to find relevant information
+- listDocuments: Browse available documents in the database
 - getDocument: Retrieve a specific document by ID
-- listDocuments: Browse available documents
-- fullTextSearch: Search documents using keywords
 
 When answering questions:
-1. Search the knowledge base for relevant information
-2. Cite your sources when providing information
-3. Be clear when information is not available in the knowledge base
-4. Provide comprehensive answers based on the retrieved content`,
-      messages,
+1. First check if the requested information is available in the knowledge base
+2. If no relevant information is found, let the user know and suggest they add the information
+3. Cite your sources when providing information from the knowledge base
+4. Provide comprehensive answers based on the retrieved content
+5. Be helpful and suggest adding relevant content when appropriate
+
+Guidelines:
+- Use search tools to find relevant content based on queries
+- Explain findings in clear, actionable terms
+- Always be transparent about what information is available or missing
+- Suggest adding new content when users ask about topics not in the knowledge base`,
+      messages: modelMessages,
+      stopWhen: stepCountIs(5),
       tools: {
-        searchDocuments: tool({
-          description: 'Search for relevant documents using semantic similarity',
-          parameters: z.object({
-            query: z.string().describe('The search query'),
-            limit: z.number().optional().default(5).describe('Number of results to return'),
-            threshold: z.number().optional().default(0.7).describe('Similarity threshold (0-1)')
+        addResource: tool({
+          description: 'Add new content to the knowledge base for future retrieval',
+          inputSchema: z.object({
+            content: z.string().describe('The content to add to the knowledge base'),
+            title: z.string().optional().describe('Optional title for the content'),
+            url: z.string().optional().describe('Optional URL source for the content')
           }),
-          execute: async ({ query, limit, threshold }) => {
+          execute: async ({ content, title, url }) => {
             try {
-              const results = await vectorSearch(query, limit, threshold);
+              // Chunk the content
+              const chunks = chunkContent(content);
+              
+              if (chunks.length === 0) {
+                return {
+                  success: false,
+                  error: 'Content too short or empty after processing'
+                };
+              }
+
+              // Store the document with chunks
+              const result = await storeDocument(
+                {
+                  title: title || 'User-provided content',
+                  content: content,
+                  url: url || undefined,
+                  metadata: {
+                    source: 'chat_interface',
+                    added_at: new Date().toISOString()
+                  }
+                },
+                chunks
+              );
+
+              return {
+                success: true,
+                documentId: result.id,
+                chunksCreated: result.chunksCreated,
+                message: `Successfully added content to knowledge base. Document ID: ${result.id}, Created ${result.chunksCreated} searchable chunks.`
+              };
+            } catch (error) {
+              return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to add content'
+              };
+            }
+          }
+        }),
+
+        getInformation: tool({
+          description: 'Search the knowledge base for relevant information',
+          inputSchema: z.object({
+            query: z.string().describe('The search query to find relevant information'),
+            limit: z.number().optional().default(5).describe('Number of results to return')
+          }),
+          execute: async ({ query, limit }) => {
+            try {
+              const results = await vectorSearch(query, limit, 0.7);
               
               if (results.length === 0) {
                 return {
-                  success: false,
-                  message: 'No relevant documents found',
-                  results: []
+                  success: true,
+                  results: [],
+                  message: 'No relevant information found in the knowledge base for this query.'
                 };
               }
-              
+
+              const enrichedResults = await Promise.all(
+                results.map(async (result) => {
+                  const doc = await getDocumentById(result.document_id);
+                  return {
+                    content: result.content,
+                    similarity: result.similarity,
+                    documentId: result.document_id,
+                    title: doc?.title,
+                    url: doc?.url,
+                    chunkId: result.chunk_id
+                  };
+                })
+              );
+
               return {
                 success: true,
-                message: `Found ${results.length} relevant documents`,
-                results: results.map(r => ({
-                  content: r.content,
-                  title: r.document_title,
-                  url: r.document_url,
-                  similarity: r.similarity,
-                  documentId: r.document_id
-                }))
+                results: enrichedResults,
+                count: enrichedResults.length,
+                message: `Found ${enrichedResults.length} relevant pieces of information in the knowledge base.`
               };
             } catch (error) {
-              console.error('Search error:', error);
               return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Search failed'
@@ -73,10 +140,39 @@ When answering questions:
           }
         }),
 
+        listDocuments: tool({
+          description: 'List available documents in the knowledge base',
+          inputSchema: z.object({
+            limit: z.number().optional().default(10).describe('Number of documents to return')
+          }),
+          execute: async ({ limit }) => {
+            try {
+              const documents = await getAllDocuments(limit, 0);
+              return {
+                success: true,
+                documents: documents.map(doc => ({
+                  id: doc.id,
+                  title: doc.title,
+                  url: doc.url,
+                  preview: doc.content ? doc.content.substring(0, 200) + '...' : 'No preview available',
+                  createdAt: doc.created_at
+                })),
+                count: documents.length,
+                message: `Found ${documents.length} documents in the knowledge base.`
+              };
+            } catch (error) {
+              return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to list documents'
+              };
+            }
+          }
+        }),
+
         getDocument: tool({
-          description: 'Get a specific document by its ID',
-          parameters: z.object({
-            documentId: z.number().describe('The document ID')
+          description: 'Retrieve a specific document by its ID',
+          inputSchema: z.object({
+            documentId: z.number().describe('The ID of the document to retrieve')
           }),
           execute: async ({ documentId }) => {
             try {
@@ -85,10 +181,10 @@ When answering questions:
               if (!document) {
                 return {
                   success: false,
-                  error: 'Document not found'
+                  error: `Document with ID ${documentId} not found`
                 };
               }
-              
+
               return {
                 success: true,
                 document: {
@@ -98,111 +194,24 @@ When answering questions:
                   url: document.url,
                   metadata: document.metadata,
                   createdAt: document.created_at
-                }
+                },
+                message: `Retrieved document: ${document.title || `Document ${document.id}`}`
               };
             } catch (error) {
-              console.error('Get document error:', error);
               return {
                 success: false,
                 error: error instanceof Error ? error.message : 'Failed to retrieve document'
               };
             }
           }
-        }),
-
-        listDocuments: tool({
-          description: 'List available documents in the knowledge base',
-          parameters: z.object({
-            limit: z.number().optional().default(10).describe('Number of documents to return'),
-            offset: z.number().optional().default(0).describe('Offset for pagination')
-          }),
-          execute: async ({ limit, offset }) => {
-            try {
-              const documents = await getAllDocuments(limit, offset);
-              
-              return {
-                success: true,
-                count: documents.length,
-                documents: documents.map(d => ({
-                  id: d.id,
-                  title: d.title,
-                  url: d.url,
-                  createdAt: d.created_at,
-                  preview: d.content.substring(0, 200) + '...'
-                }))
-              };
-            } catch (error) {
-              console.error('List documents error:', error);
-              return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Failed to list documents'
-              };
-            }
-          }
-        }),
-
-        fullTextSearch: tool({
-          description: 'Search documents using full-text search (keyword-based)',
-          parameters: z.object({
-            query: z.string().describe('Keywords to search for'),
-            limit: z.number().optional().default(10).describe('Number of results')
-          }),
-          execute: async ({ query, limit }) => {
-            try {
-              const documents = await fullTextSearch(query, limit);
-              
-              if (documents.length === 0) {
-                return {
-                  success: false,
-                  message: 'No documents found matching the keywords',
-                  results: []
-                };
-              }
-              
-              return {
-                success: true,
-                message: `Found ${documents.length} documents`,
-                results: documents.map(d => ({
-                  id: d.id,
-                  title: d.title,
-                  url: d.url,
-                  preview: d.content.substring(0, 300) + '...',
-                  createdAt: d.created_at
-                }))
-              };
-            } catch (error) {
-              console.error('Full-text search error:', error);
-              return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Search failed'
-              };
-            }
-          }
         })
-      },
-      maxSteps: 5, // Allow multiple tool calls
-      onStepFinish: ({ text, toolCalls, toolResults }) => {
-        // Optional: Log tool usage for debugging
-        if (toolCalls && toolCalls.length > 0) {
-          console.log('Tools called:', toolCalls.map(tc => tc.toolName));
-        }
       }
     });
 
-    // Return the streaming response
     return result.toTextStreamResponse();
-
+    
   } catch (error) {
     console.error('Chat API error:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: 'Failed to process chat request',
-        details: error instanceof Error ? error.message : 'Unknown error'
-      }),
-      { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
+    return new Response('Internal server error', { status: 500 });
   }
 }

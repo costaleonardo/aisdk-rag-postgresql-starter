@@ -166,7 +166,7 @@ function extractMainContent($: cheerio.CheerioAPI): string {
 /**
  * Extracts text content from a Cheerio element
  */
-function extractTextContent(element: cheerio.Cheerio<cheerio.Element>): string {
+function extractTextContent(element: cheerio.Cheerio<any>): string {
   // Get text and preserve some structure
   const lines: string[] = [];
   

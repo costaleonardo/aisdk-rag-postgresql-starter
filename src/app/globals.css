@@ -1,69 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/* Custom scrollbar styles */
-@layer utilities {
-  .scrollbar-thin {
-    scrollbar-width: thin;
-  }
+/* Ensure Montserrat font loads properly */
+.font-montserrat {
+  font-family: var(--font-montserrat), 'Montserrat', sans-serif;
+}
+
+/* Color Variables */
+:root {
+  /* Primary Colors */
+  --color-white: #FFFFFF;
+  --color-unifying-blue: #003D5B;
+  --color-jade-green: #007380;
   
-  .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
+  /* Secondary Colors - Seafoam Teal */
+  --color-seafoam-100: #25E2CC;
+  --color-seafoam-80: #51EBD6;
+  --color-seafoam-60: #7CEEE0;
+  --color-seafoam-40: #A8F3EB;
+  --color-seafoam-20: #D3F9F5;
+  --color-seafoam-10: #E9FCFA;
   
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
+  /* Accent Colors */
+  --color-tangerine-100: #FF8400;
+  --color-tangerine-20: #FFE6CC;
+  --color-sunshine-100: #FBCA18;
+  --color-sunshine-20: #FEF4D1;
+  --color-raspberry: #CC3262;
   
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(155, 155, 155, 0.5);
-    border-radius: 20px;
-    border: transparent;
-  }
-  
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(155, 155, 155, 0.7);
-  }
+  /* Text Colors */
+  --color-light-gray: #F2F2F2;
+  --color-text-gray: #2A2B2C;
 }
 
-/* Markdown content styling */
-.prose {
-  max-width: none;
-}
-
-.prose p {
-  margin-bottom: 1em;
-}
-
-.prose ul,
-.prose ol {
-  margin: 1em 0;
-  padding-left: 2em;
-}
-
-.prose li {
-  margin: 0.5em 0;
-}
-
-.prose code {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-size: 0.875em;
-}
-
-.prose pre {
-  background-color: #1e1e1e;
-  color: #d4d4d4;
-  padding: 1em;
-  border-radius: 6px;
-  overflow-x: auto;
-  margin: 1em 0;
-}
-
-.prose pre code {
-  background-color: transparent;
-  padding: 0;
-}
+/* Base Typography - handled by Tailwind configuration */
