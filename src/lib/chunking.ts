@@ -2,7 +2,11 @@ export interface ChunkOptions {
   maxLength?: number;      // Maximum length of each chunk in characters
   overlap?: number;         // Number of characters to overlap between chunks
   minChunkLength?: number;  // Minimum length for a valid chunk
+  maxChunkSize?: number;   // Alternative naming for maxLength
 }
+
+// Export alias for chunkContent to maintain API compatibility
+export const chunkText = chunkContent;
 
 /**
  * Splits text content into overlapping chunks for embedding.
@@ -13,7 +17,7 @@ export function chunkContent(
   options: ChunkOptions = {}
 ): string[] {
   const {
-    maxLength = 1000,      // Default chunk size
+    maxLength = options.maxChunkSize || 1000,      // Default chunk size
     overlap = 100,         // Default overlap between chunks
     minChunkLength = 100   // Minimum viable chunk size
   } = options;

@@ -65,18 +65,16 @@ Guidelines:
               }
 
               // Store the document with chunks
-              const result = await storeDocument(
-                {
-                  title: title || 'User-provided content',
-                  content: content,
-                  url: url || undefined,
-                  metadata: {
-                    source: 'chat_interface',
-                    added_at: new Date().toISOString()
-                  }
-                },
-                chunks
-              );
+              const result = await storeDocument({
+                title: title || 'User-provided content',
+                content: content,
+                url: url || undefined,
+                chunks,
+                metadata: {
+                  source: 'chat_interface',
+                  added_at: new Date().toISOString()
+                }
+              });
 
               return {
                 success: true,

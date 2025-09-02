@@ -19,14 +19,39 @@ export interface StoredDocument {
   chunksCreated: number;
 }
 
+interface FileDocumentInput {
+  title: string;
+  content: string;
+  chunks: string[];
+  url?: string;
+  metadata?: any;
+  file_name?: string;
+  file_type?: string;
+  file_size?: number;
+  source_type?: string;
+}
+
 /**
  * Stores a document and its chunks with embeddings in the database
  */
 export async function storeDocument(
-  content: ScrapedContent | { title: string; content: string; url?: string; metadata?: any },
-  chunks: string[]
+  input: ScrapedContent | FileDocumentInput | { title: string; content: string; url?: string; metadata?: any; chunks?: string[] }
 ): Promise<StoredDocument> {
   try {
+    // Determine chunks - either passed directly or need to be created
+    let chunks: string[];
+    let content: any;
+    
+    if ('chunks' in input && input.chunks) {
+      // FileDocumentInput or input with chunks
+      chunks = input.chunks;
+      content = input;
+    } else {
+      // Legacy format - chunks passed as separate parameter
+      // This maintains backward compatibility
+      throw new Error('Chunks must be provided in the input object');
+    }
+    
     // Check if document with URL already exists (if URL provided)
     if ('url' in content && content.url) {
       const existingDoc = await sql`
@@ -44,14 +69,23 @@ export async function storeDocument(
     // Prepare metadata
     const metadata = 'metadata' in content ? content.metadata : {};
     
-    // Insert document
+    // Determine source type
+    const sourceType = 'source_type' in content ? content.source_type : 
+                      ('file_name' in content ? 'file' : 
+                       ('url' in content && content.url ? 'url' : 'text'));
+    
+    // Insert document with file metadata if available
     const [document] = await sql`
-      INSERT INTO documents (url, title, content, metadata)
+      INSERT INTO documents (url, title, content, metadata, file_name, file_type, file_size, source_type)
       VALUES (
         ${content.url || null}, 
         ${content.title}, 
         ${content.content},
-        ${JSON.stringify(metadata)}
+        ${JSON.stringify(metadata)},
+        ${'file_name' in content ? content.file_name : null},
+        ${'file_type' in content ? content.file_type : null},
+        ${'file_size' in content ? content.file_size : null},
+        ${sourceType}
       )
       RETURNING id, url, title
     `;

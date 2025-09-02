@@ -66,7 +66,10 @@ export async function POST(request: NextRequest) {
 
     // Store document and generate embeddings
     console.log('Storing document and generating embeddings...');
-    const storedDocument = await storeDocument(documentContent, chunks);
+    const storedDocument = await storeDocument({
+      ...documentContent,
+      chunks
+    });
 
     return NextResponse.json({
       success: true,
