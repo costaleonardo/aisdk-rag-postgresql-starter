@@ -12,6 +12,10 @@ CREATE TABLE IF NOT EXISTS documents (
     title VARCHAR(512),
     content TEXT NOT NULL,
     metadata JSONB DEFAULT '{}',  -- Flexible JSON field for custom metadata
+    file_name TEXT,  -- Name of uploaded file
+    file_type VARCHAR(50),  -- Type of file (pdf, docx, txt, md, csv)
+    file_size INTEGER,  -- Size of file in bytes
+    source_type VARCHAR(20) DEFAULT 'text',  -- Source type: 'text', 'url', or 'file'
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );

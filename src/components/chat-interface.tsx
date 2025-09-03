@@ -125,7 +125,7 @@ export default function ChatInterface() {
                 <h2 className="font-montserrat font-semibold text-[48px] text-white mb-2">RAG Assistant</h2>
                 <p className="font-montserrat text-body font-regular text-white/80">
                   Welcome! I can help you search through your knowledge base and find information from your stored documents. 
-                  Ask me questions and I'll search through your content to provide detailed answers.
+                  Ask me questions and I&apos;ll search through your content to provide detailed answers.
                 </p>
                 <div className="mt-4 space-y-2 font-montserrat text-caption font-regular text-white/60">
                   <p>&quot;What documents do you have available?&quot;</p>

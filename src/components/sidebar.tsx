@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { 
   MessageCircle, 
   Globe, 
+  FileText,
   BarChart3,
   PanelLeftOpen,
   PanelLeftClose
@@ -25,6 +26,12 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       href: '/',
       icon: MessageCircle,
       current: pathname === '/'
+    },
+    {
+      name: 'Files',
+      href: '/files',
+      icon: FileText,
+      current: pathname === '/files'
     },
     {
       name: 'Web Scraper',
