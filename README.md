@@ -1,18 +1,18 @@
 # RAG Assistant - AI-Powered Knowledge Base
 
-A professional RAG (Retrieval Augmented Generation) application with a beautiful chat interface, built with Next.js 14, Vercel AI SDK, and PostgreSQL with pgvector. Features a sliding sidebar navigation, streaming chat responses, and intelligent document search capabilities.
+This is a RAG (Retrieval Augmented Generation) application with a ChatGPTish chat interface, built with Next.js 14, Vercel AI SDK, and PostgreSQL with pgvector. Features a sliding sidebar navigation, streaming chat responses, and intelligent document search capabilities.
 
 ## Features
 
-- **🎨 Professional UI** - Beautiful chat interface with sliding sidebar navigation
-- **🚀 Quick Setup** - Get your RAG application running in minutes
-- **🔍 Vector Search** - PostgreSQL with pgvector for efficient semantic similarity search
-- **🤖 AI-Powered Chat** - Streaming responses with GPT-4o and intelligent tool calling
-- **📝 Direct Input** - Add text content directly through chat interface
-- **⚡ Real-time Streaming** - Smooth chat experience with streaming responses
-- **🛠️ Smart Tools** - AI agent with multiple tools for searching and content management
-- **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
-- **📦 TypeScript** - Full type safety across the application
+- **Professional UI** - Neat chat interface with sliding sidebar navigation
+- **Quick Setup** - Get your RAG application running in minutes
+- **Vector Search** - PostgreSQL with pgvector for efficient semantic similarity search
+- **AI-Powered Chat** - Streaming responses with GPT-4o and intelligent tool calling
+- **Direct Input** - Add text content directly through chat interface
+- **Real-time Streaming** - Smooth chat experience with streaming responses
+- **Smart Tools** - AI agent with multiple tools for searching and content management
+- **Responsive Design** - Works seamlessly on desktop and mobile devices
+- **TypeScript** - Full type safety across the application
 
 ## Tech Stack
 
@@ -259,19 +259,13 @@ colors: {
 
 ## Database Providers
 
-### Neon (Recommended)
+### Neon
 1. Sign up at [neon.tech](https://neon.tech)
 2. Create a new project
 3. Enable pgvector extension:
    ```sql
    CREATE EXTENSION IF NOT EXISTS vector;
    ```
-4. Copy connection string to `.env`
-
-### Supabase
-1. Sign up at [supabase.com](https://supabase.com)
-2. Create a new project
-3. Enable pgvector in Database → Extensions
 4. Copy connection string to `.env`
 
 ### Local PostgreSQL
@@ -291,27 +285,12 @@ colors: {
 
 ## Production Deployment
 
-### Vercel (Recommended)
+### Vercel
 
 1. Push to GitHub
 2. Import project in Vercel
 3. Add environment variables
 4. Deploy
-
-### Docker
-
-Create a `Dockerfile`:
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
-```
 
 ## Common Issues & Solutions
 
@@ -353,4 +332,4 @@ For issues and questions:
 
 ---
 
-**RAG Assistant** - Built with ❤️ using Vercel AI SDK, PostgreSQL, and a professional design system for beautiful RAG experiences. :)
+**RAG Assistant** - Built with ❤️ using Vercel AI SDK, PostgreSQL, and a professional design system for internal RAG applications. :)
