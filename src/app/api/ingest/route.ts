@@ -1,51 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { scrapeUrl, validateContent } from '@/lib/scraper';
 import { chunkContent } from '@/lib/chunking';
 import { storeDocument } from '@/lib/vector-store';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { url, content, title, chunkSize = 1000, chunkOverlap = 100 } = body;
+    const { content, title, chunkSize = 1000, chunkOverlap = 100 } = body;
 
-    // Validate input
-    if (!url && !content) {
+    // Validate input - only accept content and title
+    if (!content || !title) {
       return NextResponse.json(
-        { error: 'Either URL or content is required' },
+        { error: 'Both content and title are required' },
         { status: 400 }
       );
     }
 
-    let documentContent;
-
-    if (url) {
-      // Scrape content from URL
-      console.log(`Scraping URL: ${url}`);
-      documentContent = await scrapeUrl(url);
-      
-      // Validate scraped content
-      if (!validateContent(documentContent)) {
-        return NextResponse.json(
-          { error: 'Scraped content is too short or invalid' },
-          { status: 400 }
-        );
-      }
-    } else {
-      // Use provided content
-      if (!title) {
-        return NextResponse.json(
-          { error: 'Title is required when providing raw content' },
-          { status: 400 }
-        );
-      }
-      
-      documentContent = {
-        url: undefined,
-        title,
-        content,
-        metadata: {}
-      };
+    // Validate content length
+    if (content.length < 50) {
+      return NextResponse.json(
+        { error: 'Content must be at least 50 characters long' },
+        { status: 400 }
+      );
     }
+
+    const documentContent = {
+      url: undefined,
+      title,
+      content,
+      metadata: {}
+    };
 
     // Chunk the content
     console.log(`Chunking content with size ${chunkSize} and overlap ${chunkOverlap}`);
@@ -75,7 +58,6 @@ export async function POST(request: NextRequest) {
       success: true,
       document: {
         id: storedDocument.id,
-        url: storedDocument.url,
         title: storedDocument.title,
         chunksCreated: storedDocument.chunksCreated,
         totalChunks: chunks.length
@@ -98,12 +80,10 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     status: 'ok',
-    message: 'Ingestion endpoint is ready. Send a POST request with URL or content to ingest.',
+    message: 'Ingestion endpoint is ready. Send a POST request with content and title to ingest.',
     example: {
-      url: 'https://example.com/article',
-      // OR
       content: 'Your text content here...',
-      title: 'Document Title (required if using content)',
+      title: 'Document Title (required)',
       chunkSize: 1000, // optional
       chunkOverlap: 100 // optional
     }
