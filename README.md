@@ -1,5 +1,7 @@
 # RAG Assistant - AI-Powered Knowledge Base
 
+![RAG Assistant Interface](public/rag-assistant-screenshot.png)
+
 This is a RAG (Retrieval Augmented Generation) application with a ChatGPTish chat interface, built with Next.js 14, Vercel AI SDK, and PostgreSQL with pgvector. Features a sliding sidebar navigation, streaming chat responses, and intelligent document search capabilities.
 
 ## Features
