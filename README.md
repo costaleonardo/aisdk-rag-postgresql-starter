@@ -353,4 +353,4 @@ For issues and questions:
 
 ---
 
-**RAG Assistant** - Built with ❤️ using Vercel AI SDK, PostgreSQL, and a professional design system for beautiful RAG experiences.
+**RAG Assistant** - Built with ❤️ using Vercel AI SDK, PostgreSQL, and a professional design system for beautiful RAG experiences. :)
