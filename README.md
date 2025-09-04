@@ -8,8 +8,7 @@ A professional RAG (Retrieval Augmented Generation) application with a beautiful
 - **🚀 Quick Setup** - Get your RAG application running in minutes
 - **🔍 Vector Search** - PostgreSQL with pgvector for efficient semantic similarity search
 - **🤖 AI-Powered Chat** - Streaming responses with GPT-4o and intelligent tool calling
-- **📊 Web Scraping** - Automatic content extraction and cleaning from URLs
-- **📝 Direct Input** - Add text content directly through chat or dedicated interface
+- **📝 Direct Input** - Add text content directly through chat interface
 - **⚡ Real-time Streaming** - Smooth chat experience with streaming responses
 - **🛠️ Smart Tools** - AI agent with multiple tools for searching and content management
 - **📱 Responsive Design** - Works seamlessly on desktop and mobile devices
@@ -86,11 +85,6 @@ You can add content to your knowledge base in multiple ways:
 - Ask the assistant to add content directly: "Add this information about..."
 - The AI will use the `addResource` tool to store content with proper chunking
 
-**Via Web Scraper Page** (`/scraper`):
-- **URL Scraping**: Enter any website URL for automatic content extraction and cleaning
-- **Direct Text Input**: Paste raw text content with optional title
-- Professional interface with real-time feedback
-
 **Automatic Processing**:
 - Content is intelligently chunked using sentence boundaries
 - Each chunk is embedded using OpenAI's text-embedding-ada-002
@@ -122,7 +116,6 @@ aisdk-rag-postgresql-starter/
 │   │   ├── api/
 │   │   │   ├── chat/          # AI chat endpoint with GPT-4o and tool calling
 │   │   │   └── ingest/        # Content ingestion endpoint (URL + text)
-│   │   ├── scraper/           # Web scraping and text input interface
 │   │   ├── page.tsx           # Main chat interface
 │   │   ├── layout.tsx         # Root layout with Montserrat font
 │   │   └── globals.css        # Global styles with custom design system
@@ -137,8 +130,7 @@ aisdk-rag-postgresql-starter/
 │   └── lib/
 │       ├── db.ts              # Neon PostgreSQL connection
 │       ├── vector-store.ts    # Vector operations and embedding generation
-│       ├── chunking.ts        # Intelligent text chunking with sentence boundaries
-│       └── scraper.ts         # Web scraping with Cheerio
+│       └── chunking.ts        # Intelligent text chunking with sentence boundaries
 ├── database/
 │   └── schema.sql             # PostgreSQL schema with pgvector and HNSW indexes
 ├── public/
@@ -151,13 +143,11 @@ aisdk-rag-postgresql-starter/
 ## API Endpoints
 
 ### POST `/api/ingest`
-Ingest content from URL or raw text.
+Ingest content from raw text.
 
 **Request body**:
 ```json
 {
-  "url": "https://example.com/article",
-  // OR
   "content": "Your text content...",
   "title": "Document Title",
   "chunkSize": 1000,      // optional

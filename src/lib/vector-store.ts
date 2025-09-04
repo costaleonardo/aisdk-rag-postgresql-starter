@@ -1,7 +1,6 @@
 import { sql, type Document, type DocumentChunk } from './db';
 import { openai } from '@ai-sdk/openai';
 import { embed } from 'ai';
-import { type ScrapedContent } from './scraper';
 
 export interface SearchResult {
   content: string;
@@ -35,7 +34,7 @@ interface FileDocumentInput {
  * Stores a document and its chunks with embeddings in the database
  */
 export async function storeDocument(
-  input: ScrapedContent | FileDocumentInput | { title: string; content: string; url?: string; metadata?: any; chunks?: string[] }
+  input: FileDocumentInput | { title: string; content: string; url?: string; metadata?: any; chunks?: string[] }
 ): Promise<StoredDocument> {
   try {
     // Determine chunks - either passed directly or need to be created

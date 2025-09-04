@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
   MessageCircle, 
-  Globe, 
   FileText,
   BarChart3,
   PanelLeftOpen,
@@ -32,12 +31,6 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
       href: '/files',
       icon: FileText,
       current: pathname === '/files'
-    },
-    {
-      name: 'Web Scraper',
-      href: '/scraper',
-      icon: Globe,
-      current: pathname === '/scraper'
     },
     // {
     //   name: 'Knowledge Base',
@@ -95,7 +88,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </div> */}
 
         {/* Navigation */}
-        <nav className={`${isOpen ? 'px-4' : 'px-2'} pb-4 transition-all duration-300`}>
+        <nav className={`${isOpen ? 'px-4' : 'px-2'} pb-4 transition-all duration-300 pt-6`}>
           <div className="space-y-2">
             {navigation.map((item, index) => {
               const Icon = item.icon;
